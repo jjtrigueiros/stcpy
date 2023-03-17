@@ -12,8 +12,8 @@ def root_handler() -> dict[str, str]:
     return {"hello": "world"}
 
 
-@get("/{line:int}/{stop:int}")
-def get_timetable(line: int, stop: int) -> list[list[str]]:
+@get("/{line:str}/{stop:int}")
+def get_timetable(line: str, stop: int) -> list[list[str]]:
     """Demo endpoint"""
     client = STCPClient()
     line_704_stops = get_stops(line, False)
