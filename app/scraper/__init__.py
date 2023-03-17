@@ -16,8 +16,7 @@ class BusRoute(BaseModel, frozen=True):
     code: str
     pubcode: str
     description: str
-# TODO: consider circular lines
-
+    circular: bool
 
 class BusStop(BaseModel, frozen=True):
     """Represents an STCP bus stop"""
@@ -35,7 +34,12 @@ def get_lines() -> set[BusRoute]:
             BusRoute(
                 code=record.get('code'),
                 pubcode=record.get('pubcode'),
-                description=record.get('description')
+                description=record.get('description'),
+                # Empirically determining if line is circular would require a second api call per line,
+                # either to check if there are no stops in line when direction is 1, or to check
+                # if the first and last stops are the same when line direction is 0.
+                # Hence, the following hacky, but faster approach:
+                circular=('CIRCULAR' in record.get('description'))
                 ) for record in line_data.get('records')}
         return lines
 
