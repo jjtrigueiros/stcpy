@@ -4,7 +4,7 @@ Reused from a previous project - refactor pending.
 """
 
 from typing import Optional
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
 import requests
 from bs4 import BeautifulSoup
@@ -27,16 +27,10 @@ class BusStop(BaseModel, frozen=True):
     zone: str
 
 
-class STCPClient():
-    """Client to get bus info from STCP by scraping SMSBUS"""
-    def __init__(self, uid: Optional[UUID] = None, link: str = "www.stcp.pt/pt/widget/post.php?"):
-        self.uid = uid.hex if uid else uuid4().hex  # "d72242190a22274321cacf9eadc7ec5f"
-        self.link = link
-
-    def get_lines(self) -> set[BusRoute]:
+def get_lines() -> set[BusRoute]:
         """Retrieve line info from SMSBUS"""
-        request_url = "http://www.stcp.pt/pt/itinerarium/callservice.php?action=lineslist&service=1"
-        line_data = requests.get(request_url, timeout=10).json()
+        request_url = "http://www.stcp.pt/pt/itinerarium/callservice.php?action=lineslist"
+        line_data = requests.get(request_url, timeout=9).json()
         lines = {
             BusRoute(
                 code=record.get('code'),
@@ -45,30 +39,37 @@ class STCPClient():
                 ) for record in line_data.get('records')}
         return lines
 
-    def get_stops(self, linha: str, ldir: bool) -> list[BusStop]:
-        """Get stops"""
-        ldir_str: str = "1" if ldir else "0"
-        request_url = f"http://www.stcp.pt/pt/itinerarium/callservice.php?action=linestops&lcode={linha}&ldir={ldir_str}"
-        stops_data = requests.get(request_url, timeout=10).json()
 
-        paragens = [
-            BusStop(
-                code=record.get('code'),
-                name=record.get('name'),
-                address=record.get('address'),
-                zone=record.get('zone'),
-            ) for record in stops_data.get('records')
-        ]
+def get_stops(line: str, direction: bool) -> list[BusStop]:
+    """Get stops"""
+    ldir_str: str = "1" if direction else "0"
+    request_url = f"http://www.stcp.pt/pt/itinerarium/callservice.php?action=linestops&lcode={line}&ldir={ldir_str}"
+    stops_data = requests.get(request_url, timeout=10).json()
+    stops = [
+        BusStop(
+            code=record.get('code'),
+            name=record.get('name'),
+            address=record.get('address'),
+            zone=record.get('zone'),
+        ) for record in stops_data.get('records')
+    ]
+    return stops
 
-        return paragens
+
+class STCPClient():
+    """Client to get bus info from STCP by scraping SMSBUS"""
+    def __init__(self, uid: Optional[UUID] = None, link: str = "www.stcp.pt/pt/widget/post.php?"):
+        self.uid = uid.hex if uid else uuid4().hex
+        self.link = link
 
     def get_times(self, bus_stop: BusStop):
         """
         Get real-time next arrivals for a given stop
         """
         paragem = bus_stop.code
-        request = f"http://{self.link}uid={self.uid}&paragem={paragem}" # &submete=Mostrar"
-        # &np={'anything'} -> adds to the name field in the widget display
+        request = f"http://{self.link}uid={self.uid}&paragem={paragem}"
+        # &submete=Mostrar" -> doesn't seem to do anything
+        # &np={'str'} -> adds to the name field in the widget display
 
         response = requests.get(request, timeout=10)
         soup = BeautifulSoup(response.text, 'html.parser')
