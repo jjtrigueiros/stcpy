@@ -26,24 +26,6 @@ class BusStop(BaseModel, frozen=True):
     zone: str
 
 
-def get_lines() -> set[BusRoute]:
-        """Retrieve line info from SMSBUS"""
-        request_url = "http://www.stcp.pt/pt/itinerarium/callservice.php?action=lineslist"
-        line_data = requests.get(request_url, timeout=9).json()
-        lines = {
-            BusRoute(
-                code=record.get('code'),
-                pubcode=record.get('pubcode'),
-                description=record.get('description'),
-                # Empirically determining if line is circular would require a second api call per line,
-                # either to check if there are no stops in line when direction is 1, or to check
-                # if the first and last stops are the same when line direction is 0.
-                # Hence, the following hacky, but faster approach:
-                circular=('CIRCULAR' in record.get('description'))
-                ) for record in line_data.get('records')}
-        return lines
-
-
 def get_stops(line: str, direction: bool) -> list[BusStop]:
     """Get stops"""
     ldir_str: str = "1" if direction else "0"
