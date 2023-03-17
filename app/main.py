@@ -6,7 +6,7 @@ from starlite import Starlite, get
 from app.scraper import STCPClient, get_lines, get_stops, BusRoute, BusStop
 
 
-@get()
+@get("/")
 def root_handler() -> dict[str, str]:
     """Keeping the tradition alive with hello world."""
     return {"hello": "world"}

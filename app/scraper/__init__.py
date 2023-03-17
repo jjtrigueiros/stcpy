@@ -92,8 +92,6 @@ class STCPClient():
 
         # TODO: make use of warnings (elements are inside a DIV with ID = "cycle-alertas")
         warnings = soup.find(id="cycle-alertas").contents
-        for warning in warnings:
-            print(warning.string)
 
         return hits
 
