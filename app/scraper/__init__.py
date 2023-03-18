@@ -3,31 +3,57 @@ Holds the main STCP widget scraper.
 Reused from a previous project - refactor pending.
 """
 
+import urllib
 from typing import Optional
 from uuid import UUID, uuid4
 
 import requests
 from bs4 import BeautifulSoup
-from pydantic import BaseModel
+
+from app.models import BusStop, BusRoute
 
 
-class BusRoute(BaseModel, frozen=True):
-    """Represents an STCP bus route"""
-    code: str
-    pubcode: str
-    description: str
-    circular: bool
-
-class BusStop(BaseModel, frozen=True):
-    """Represents an STCP bus stop"""
-    code: str
-    name: str
-    address: str
-    zone: str
+REQUEST_TIMEOUT = 10
+ITINERARIUM_URL = "http://www.stcp.pt/pt/itinerarium/callservice.php?"
+WIDGET_URL = "www.stcp.pt/pt/widget/post.php?"
 
 
-def get_stops(line: str, direction: bool) -> list[BusStop]:
-    """Get stops"""
+def call_itinerarium(**kwargs: dict[str]) -> requests.Response:
+    """
+    Wrapper function to call the STCP Itinerarium endpoint with the provided arguments.
+
+    Known accepted arguments:
+        action=lineslist -> lists the lines
+        action=linestops -> lists the stops for a given stop code lcode=<stop_code> and a direction ldir=<0|1>
+    """
+    url = f"{ITINERARIUM_URL}{urllib.parse.urlencode(kwargs)}"
+    return requests.get(url, timeout=REQUEST_TIMEOUT)
+
+def get_lines() -> set[BusRoute]:
+    """
+    Simple endpoint to get the set of available BusRoutes.
+    Wrapper for one of the itinerarium endpoints.
+    """
+    line_data = call_itinerarium({"action": "lineslist"}).json()
+    lines = {
+        BusRoute(
+            code=record.get('code'),
+            pubcode=record.get('pubcode'),
+            description=record.get('description'),
+            # Empirically determining if line is circular would require a second api call per line,
+            # either to check if there are no stops in line when direction is 1, or to check
+            # if the first and last stops are the same when line direction is 0.
+            # Hence, the following hacky, but faster approach:
+            circular=('CIRCULAR' in record.get('description'))
+            ) for record in line_data.get('records')}
+    return lines
+
+
+def get_line_stops(line: str, direction:bool = False) -> list[BusStop]:
+    """
+    Simple endpoint to provide the list of stops for a given route.
+    Wrapper for one of the itinerarium endpoints.
+    """
     ldir_str: str = "1" if direction else "0"
     request_url = f"http://www.stcp.pt/pt/itinerarium/callservice.php?action=linestops&lcode={line}&ldir={ldir_str}"
     stops_data = requests.get(request_url, timeout=10).json()
@@ -44,9 +70,9 @@ def get_stops(line: str, direction: bool) -> list[BusStop]:
 
 class STCPClient():
     """Client to get bus info from STCP by scraping SMSBUS"""
-    def __init__(self, uid: Optional[UUID] = None, link: str = "www.stcp.pt/pt/widget/post.php?"):
+    def __init__(self, uid: Optional[UUID] = None):
         self.uid = uid.hex if uid else uuid4().hex
-        self.link = link
+        self.link = WIDGET_URL
 
     def get_times(self, bus_stop: BusStop):
         """
@@ -54,8 +80,6 @@ class STCPClient():
         """
         paragem = bus_stop.code
         request = f"http://{self.link}uid={self.uid}&paragem={paragem}"
-        # &submete=Mostrar" -> doesn't seem to do anything
-        # &np={'str'} -> adds to the name field in the widget display
 
         response = requests.get(request, timeout=10)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -80,20 +104,3 @@ class STCPClient():
         warnings = soup.find(id="cycle-alertas").contents
 
         return hits
-
-
-def demo_function():
-    """
-    For debugging and proof-of-concept purposes
-    """
-    client = STCPClient()
-    lines = client.get_lines()
-    print(lines)
-    line: str = '704'
-    line_704_stops = client.get_stops(line, False)
-    print(line_704_stops)
-    line_704_1_timetable = client.get_times(line_704_stops[0])
-    print(line_704_1_timetable)
-
-if __name__ == '__main__':
-    demo_function()
