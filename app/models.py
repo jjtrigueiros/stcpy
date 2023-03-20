@@ -1,3 +1,5 @@
+"""Application Data Models"""
+
 from pydantic import BaseModel
 
 

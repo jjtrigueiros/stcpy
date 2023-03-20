@@ -7,7 +7,7 @@ __all__ = ["router"]
 
 
 router = Router(
-    path="/v1",
+    path="/v0",
     route_handlers=[
         timetables.router
 ])

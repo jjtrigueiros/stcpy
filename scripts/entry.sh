@@ -7,4 +7,5 @@ set -o pipefail
 set -o nounset
 
 echo Starting Starlite App...
-uvicorn app:app
+uvicorn --host 0.0.0.0 app:app
+
