@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 import requests
 from bs4 import BeautifulSoup
 
-from stcpy.settings import WIDGET_URL, REQUEST_TIMEOUT
+from stcpy.lib import settings
 
 from .itinerarium import get_line_stops, get_lines
 
@@ -23,8 +23,8 @@ def get_times(bus_stop_id: str, uid: Optional[UUID] = None):
     """
     uid = uid.hex if uid else uuid4().hex
     bus_stop_id = bus_stop_id.upper()  # case-insensitive
-    request = f"{WIDGET_URL}uid={uid}&paragem={bus_stop_id}"
-    response = requests.get(request, timeout=REQUEST_TIMEOUT)
+    request = f"{settings.app.WIDGET_URL}uid={uid}&paragem={bus_stop_id}"
+    response = requests.get(request, timeout=settings.app.REQUEST_TIMEOUT)
     soup = BeautifulSoup(response.text, "html.parser")
     hits = []
     for hit in soup.find_all(class_="separa"):

@@ -4,10 +4,7 @@ import urllib
 import requests
 
 from stcpy.models import BusRoute, BusStop
-from stcpy.settings import REQUEST_TIMEOUT
-
-
-ITINERARIUM_URL = "http://www.stcp.pt/pt/itinerarium/callservice.php?"
+from stcpy.lib import settings
 
 
 def call_itinerarium(**kwargs: dict[str]) -> requests.Response:
@@ -24,8 +21,8 @@ def call_itinerarium(**kwargs: dict[str]) -> requests.Response:
         action=srchstoplines
             -> retrieves useful detailed information (such as GPS coordinates) for a given stop stopcode=<stop_code>
     """
-    url = f"{ITINERARIUM_URL}{urllib.parse.urlencode(kwargs)}"
-    return requests.get(url, timeout=REQUEST_TIMEOUT)
+    url = f"{settings.app.ITINERARIUM_URL}{urllib.parse.urlencode(kwargs)}"
+    return requests.get(url, timeout=settings.app.REQUEST_TIMEOUT)
 
 
 def get_lines() -> set[BusRoute]:
@@ -54,8 +51,7 @@ def get_line_stops(line: str, direction: bool = False) -> list[BusStop]:
     Wrapper for one of the itinerarium endpoints.
     """
     ldir_str: str = "1" if direction else "0"
-    request_url = f"http://www.stcp.pt/pt/itinerarium/callservice.php?action=linestops&lcode={line}&ldir={ldir_str}"
-    stops_data = requests.get(request_url, timeout=10).json()
+    stops_data = call_itinerarium(action="linestops", lcode=line, ldir=ldir_str).json()
     stops = [
         BusStop(
             code=record.get("code"),

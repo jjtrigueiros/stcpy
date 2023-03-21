@@ -4,6 +4,7 @@
 # Environment artifacts
 /venv/
 /.venv/
+**/.env
 
 # Testing artifacts
 **/.pytest_cache
