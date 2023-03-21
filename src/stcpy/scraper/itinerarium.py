@@ -3,8 +3,8 @@
 import urllib
 import requests
 
-from app.models import BusRoute, BusStop
-from app.settings import REQUEST_TIMEOUT
+from stcpy.models import BusRoute, BusStop
+from stcpy.settings import REQUEST_TIMEOUT
 
 
 ITINERARIUM_URL = "http://www.stcp.pt/pt/itinerarium/callservice.php?"
@@ -36,17 +36,19 @@ def get_lines() -> set[BusRoute]:
     line_data = call_itinerarium(action="lineslist").json()
     lines = {
         BusRoute(
-            code=record.get('code'),
-            pubcode=record.get('pubcode'),
-            description=record.get('description'),
+            code=record.get("code"),
+            pubcode=record.get("pubcode"),
+            description=record.get("description"),
             # Empirically determining if line is circular would require a second api call per line,
             # for the linedirslist action. While there is no cache, this approach is hacky but faster:
-            circular=('CIRCULAR' in record.get('description'))
-            ) for record in line_data.get('records')}
+            circular=("CIRCULAR" in record.get("description")),
+        )
+        for record in line_data.get("records")
+    }
     return lines
 
 
-def get_line_stops(line: str, direction:bool = False) -> list[BusStop]:
+def get_line_stops(line: str, direction: bool = False) -> list[BusStop]:
     """
     Simple endpoint to provide the list of stops for a given route.
     Wrapper for one of the itinerarium endpoints.
@@ -56,10 +58,11 @@ def get_line_stops(line: str, direction:bool = False) -> list[BusStop]:
     stops_data = requests.get(request_url, timeout=10).json()
     stops = [
         BusStop(
-            code=record.get('code'),
-            name=record.get('name'),
-            address=record.get('address'),
-            zone=record.get('zone'),
-        ) for record in stops_data.get('records')
+            code=record.get("code"),
+            name=record.get("name"),
+            address=record.get("address"),
+            zone=record.get("zone"),
+        )
+        for record in stops_data.get("records")
     ]
     return stops

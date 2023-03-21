@@ -1,8 +1,8 @@
 """Endpoint to retrieve the timetables"""
- 
+
 from starlite import Router, get
 
-from app.scraper import get_line_stops, get_times
+from stcpy.scraper import get_line_stops, get_times
 
 
 @get("/")
@@ -22,11 +22,11 @@ def get_by_line_dir_stop(line: str, direction: int, stop: int) -> list[list[str]
 @get("/stop/{stop:str}/")
 def get_by_stop_id(stop: str) -> list[list[str]]:
     """Provided a stop ID, retrieves the timetable."""
-    line_timetable=get_times(stop)
+    line_timetable = get_times(stop)
     return line_timetable
 
 
 router = Router(
     path="/timetables",
-    route_handlers=[endpoint_help, get_by_line_dir_stop, get_by_stop_id]
+    route_handlers=[endpoint_help, get_by_line_dir_stop, get_by_stop_id],
 )

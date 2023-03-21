@@ -12,7 +12,7 @@ starlite = "^1.51.7"
 requests = "^2.28.2"
 uvicorn = "^0.21.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
 black = "^22.1.0"
 pytest = "^7.1.1"

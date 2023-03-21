@@ -1,3 +1,12 @@
-/.venv/
+# IDE
 /.vscode/
+
+# Environment artifacts
+/venv/
+/.venv/
+
+# Testing artifacts
+**/.pytest_cache
+
+# Python artifacts
 **/__pycache__/
