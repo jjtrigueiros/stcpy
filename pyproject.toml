@@ -2,7 +2,7 @@
 name = "stcpy"
 version = "0.0.1"
 description = "A self-hostable API to retrieve real time bus arrival data from STCP."
-authors = ["Jose Trigueiros"]
+authors = ["Jose Trigueiros <jjtrigueiros@gmail.com>"]
 license = "BSD-3-Clause"
 readme = "README.md"
 
