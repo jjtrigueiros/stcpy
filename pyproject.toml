@@ -2,7 +2,7 @@
 name = "stcpy"
 version = "0.0.1"
 description = "A self-hostable API to retrieve real time bus arrival data from STCP."
-authors = ["Jose Trigueiros"]
+authors = ["Jose Trigueiros <jjtrigueiros@gmail.com>"]
 license = "BSD-3-Clause"
 readme = "README.md"
 
@@ -12,7 +12,7 @@ starlite = "^1.51.7"
 requests = "^2.28.2"
 uvicorn = "^0.21.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
 black = "^22.1.0"
 pytest = "^7.1.1"
