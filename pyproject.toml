@@ -11,6 +11,7 @@ python = ">=3.9, <4.0"
 starlite = "^1.51.7"
 requests = "^2.28.2"
 uvicorn = "^0.21.1"
+pydantic = {extras = ["dotenv"], version = "^1.10.9"}
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
