@@ -9,10 +9,9 @@ Application in early development. The API may change drastically on any given up
 ### Running the app
 1. Navigate to the project directory
 2. Install the project dependencies
-   - recommended: `poetry install && poetry shell`
-3. Source the required environment variables
-   - ex.: `source .example.env`
-4. Serve the application with Uvicorn 
+   - ex.: `poetry install && poetry shell`
+   - alt.: `pip install -r requirements.txt`
+3. Start the application using Uvicorn
    - ex.: `./scripts/entry.sh`
 
 ### Retrieving data
