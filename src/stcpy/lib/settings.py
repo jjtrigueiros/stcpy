@@ -5,6 +5,7 @@ from pydantic import BaseSettings
 class AppSettings(BaseSettings):
     class Config:
         case_sensitive = True
+        env_file = '.example.env', '.env'
 
     DEBUG: bool
     ENVIRONMENT: str
@@ -19,6 +20,7 @@ class OpenAPISettings(BaseSettings):
     class Config:
         env_prefix = "OPENAPI_"
         case_sensitive = True
+        env_file = '.example.env', '.env'
 
     TITLE: Optional[str]
     VERSION: str
